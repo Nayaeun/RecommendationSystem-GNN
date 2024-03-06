@@ -1,0 +1,7 @@
+numpy>=1.21
+scipy
+torch>=1.10.0
+networkx>=2.4
+hyperopt
+scikit-learn
+setuptools==40.6.3
