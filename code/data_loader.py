@@ -6,6 +6,8 @@ import torch
 import os
 from sentence_transformers import SentenceTransformer
 from torch_geometric.data import HeteroData, download_url, extract_zip
+from torch_sparse import SparseTensor
+
 #%%
 # Assuming the 'data' directory is in the same directory as your script
 data_dir = './data'
@@ -118,10 +120,23 @@ edge_index, edge_label = load_edge_csv(
     encoders={'rating': IdentityEncoder(dtype=torch.float)}  # Replace with actual encoder implementations
 )
 
-# Create the HeteroData object
+# Now, define the function to convert edge index to adjacency matrix
+def edge_index_to_adjacency(edge_index, num_nodes):
+    # Create a SparseTensor and then convert it to a dense matrix
+    adj = SparseTensor(row=edge_index[0], col=edge_index[1], sparse_sizes=(num_nodes, num_nodes))
+    adj = adj.to_dense()
+    return adj
+
+# Finally, call the function after you've loaded your graph data
 data = HeteroData()
 data['movie'].x = movie_x
 data['user'].num_nodes = len(user_mapping)
 data['user', 'rates', 'movie'].edge_index = edge_index
 data['user', 'rates', 'movie'].edge_attr = edge_label
+
+# Calculate the adjacency matrix after loading the graph data
+num_users = data['user'].num_nodes
+num_movies = data['movie'].x.size(0)
+adj = edge_index_to_adjacency(data['user', 'rates', 'movie'].edge_index, num_users + num_movies)
+
 # %%
