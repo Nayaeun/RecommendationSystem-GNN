@@ -5,3 +5,5 @@ networkx>=2.4
 hyperopt
 scikit-learn
 setuptools==40.6.3
+pandas
+sentence-transformers
